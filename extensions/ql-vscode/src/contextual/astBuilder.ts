@@ -4,6 +4,9 @@ import { DecodedBqrsChunk, BqrsId, EntityValue } from '../pure/bqrs-cli-types';
 import { DatabaseItem } from '../databases';
 import { ChildAstItem, AstItem } from '../astViewer';
 import fileRangeFromURI from './fileRangeFromURI';
+import { writeFile } from 'fs';
+import * as path from 'path';
+
 
 /**
  * A class that wraps a tree of QL results from a query that
@@ -26,6 +29,22 @@ export default class AstBuilder {
     if (!this.roots) {
       this.roots = await this.parseRoots();
     }
+
+    const cache: any[] = [];
+    writeFile(`C:\\Users\\wnipu\\Desktop\\${path.basename(this.fileName)}.json`, JSON.stringify(this.roots, (_, value) => {
+      if (typeof value === 'object' && value !== null) {
+        // Duplicate reference found, discard key
+        if (cache.includes(value)) return;
+
+        // Store value in our collection
+        cache.push(value);
+      }
+      return value;
+    }), (err) => {
+      if (err) throw err;
+      console.log(path.basename(this.fileName) + '.json file has been saved!');
+    });
+
     return this.roots;
   }
 
